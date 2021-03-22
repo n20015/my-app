@@ -1,56 +1,48 @@
-import React from 'react'
+import React, { Component } from 'react'
+import { render } from 'react-dom'
+import './App.css'
+import Button from '@material-ui/core/Button'
 
-class UserProfiles extends React.Component {
-  constructor () {
-    super()
+class Exchange extends Component {
+  constructor (props) {
+    super(props)
     this.state = {
-      users: []
+      isLoaded: false,
+      items: []
     }
   }
-
   componentDidMount () {
-    fetch('https://randomuser.me/api/?results=50')
-      .then(response => {
-        if (response.ok) return response.json()
-        throw new Error('Request failed.')
-      })
-      .then(data => {
-        this.setState({ users: data.results })
-      })
-      .catch(error => {
-        console.log(error)
+    fetch('https://yesno.wtf/api')
+      .then(res => res.json())
+      .then(json => {
+        console.log(json.rates)
+        this.setState({
+          isLoaded: true,
+          items: json.answer,
+          images: json.image
+        })
       })
   }
 
   render () {
-    const list = this.state.users.map((u, i) => {
+    const { items, isLoaded, images } = this.state
+console.log(this.state)
+    if (!isLoaded) {
+      return <h1 Style='text-align:center'>Now Loading...</h1>
+    } else {
       return (
-        <User
-          key={u.login.md5}
-          name={`${u.name.first} ${u.name.last}`}
-          email={u.email}
-        />
+        <div class='backcolor'>
+          <h1 Style='text-align:center'><font color='#3d5afe'>{items}!</font></h1>
+          <img class='images' src={images} />
+          <div class='button'>
+            <Button size='large' variant='contained' color='primary' onClick={() => window.location.reload()}>Next Yes or No ?</Button>
+          </div>
+        </div>
       )
-    })
-    return (
-      <div>
-        <h1>My users list:</h1>
-        <button onClick={() => window.location.reload()}>reload</button>
-        {list}
-      </div>
-    )
+    }
   }
 }
 
-class User extends React.Component {
-  render () {
-    return (
-      <div style={{ borderStyle: 'dotted' }}>
-        <h3>{this.props.name}</h3>
-        <p>{this.props.email}</p>
-      </div>
-    )
-  }
-}
+export default Exchange
 
-export default UserProfiles
+render(<Exchange />, document.getElementById('root'))
